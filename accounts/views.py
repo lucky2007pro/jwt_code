@@ -1,5 +1,4 @@
-from django.contrib.auth import authenticate
-from rest_framework.exceptions import ValidationError
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -13,27 +12,29 @@ class SignUpView(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+        user = serializer.save()
+
+        return Response(
+            {
+                'message': 'User created successfully.',
+                'user': SignUpSerializer(user).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class LoginView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data['username']
-        password = serializer.validated_data['password']
-
-        user = authenticate(username=username, password=password)
-        if user is None:
-            raise ValidationError('Invalid credentials')
-
+        user = serializer.validated_data['user']
         token = RefreshToken.for_user(user)
-        response = {
-            'message': 'Login successful',
-            'status': 200,
+
+        return Response(
+            {
+                'message': 'Login successful.',
             'access': str(token.access_token),
             'refresh': str(token),
-        }
-
-        return Response(response)
+            },
+            status=status.HTTP_200_OK,
+        )
