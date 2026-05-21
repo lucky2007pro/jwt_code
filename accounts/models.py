@@ -7,14 +7,13 @@ from django.utils import timezone
 from conf.settings import EMAIL_EXPIRATION_TIME, PHONE_EXPIRATION_TIME
 from rest_framework_simplejwt.tokens import RefreshToken
 import string
-from datetime import timedelta, datetime
 
 ORDINARY_USER, SELLER, ADMIN = ('ordinary_user', 'seller', 'admin')
 VIA_PHONE, VIA_EMAIL = ('via_phone', 'via_email')
 NEW, CODE_VERIFY, CHANGE_INFO, DONE = ('new', 'code_verify', 'change_info', 'done')
 
 
-class CustomUser(AbstractUser, BaseModel):
+class CustomUser(BaseModel, AbstractUser):
     USER_ROLE = (
         (ORDINARY_USER, ORDINARY_USER),
         (SELLER, SELLER),
@@ -62,41 +61,33 @@ class CustomUser(AbstractUser, BaseModel):
             'access': str(refresh.access_token),
         }
 
-    def check_username(self):
+    def ensure_username(self):
         if not self.username:
             temp_username = str(uuid.uuid4()).split('-')[-1]
             while CustomUser.objects.filter(username=temp_username).exists():
                 temp_username += str(random.randint(0, 10))
             self.username = temp_username
-            self.save(update_fields=['username'])
 
-    def check_password(self):
-        if not self.password():
+    def ensure_password(self):
+        if not self.password or not self.has_usable_password():
             temp_password = str(uuid.uuid4()).split('-')[-1]
-        self.password = temp_password
-        self.save(update_fields=['password'])
+            self.set_password(temp_password)
 
     def email_normalize(self):
         if self.email:
             self.email = self.email.lower()
-            self.save(update_fields=['email'])
-
-    def hash_pass(self, raw_password):
-        self.set_password(raw_password)
-        self.save(update_fields=['password'])
 
     def clean(self):
         super().clean()
         self.email_normalize()
-        self.hash_pass()
-        self.check_username()
-        self.check_password()
+        self.ensure_username()
+        self.ensure_password()
 
     def save(self, *args, **kwargs):
         self.clean()
         super().save(*args, **kwargs)
 
-class CodeVerify(models.Model, BaseModel):
+class CodeVerify(BaseModel):
     VERIFY_TYPE = (
         (VIA_PHONE, VIA_PHONE),
         (VIA_EMAIL, VIA_EMAIL),
@@ -104,7 +95,7 @@ class CodeVerify(models.Model, BaseModel):
 
     code = models.CharField(max_length=4, null=False)
     verify_type = models.CharField(max_length=20, choices=VERIFY_TYPE)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='code_verifies')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='code_verifies', null=False)
     if_used = models.BooleanField(default=False)
     expiration_time = models.DateTimeField()
 

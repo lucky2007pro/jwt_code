@@ -6,14 +6,14 @@ from .models import CustomUser, CodeVerify
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-    fieldsets = UserAdmin.fieldsets + (
+    fieldsets = list(UserAdmin.fieldsets) + [
         ('Contact', {'fields': ('phone_number', 'photo')}),
         ('Auth', {'fields': ('user_role', 'auth_type', 'auth_status')}),
-    )
-    add_fieldsets = UserAdmin.add_fieldsets + (
+    ]
+    add_fieldsets = list(UserAdmin.add_fieldsets) + [
         ('Contact', {'fields': ('phone_number', 'photo')}),
         ('Auth', {'fields': ('user_role', 'auth_type', 'auth_status')}),
-    )
+    ]
     list_display = ('username', 'email', 'phone_number', 'user_role', 'auth_status', 'is_staff', 'is_active')
 
 
