@@ -1,18 +1,20 @@
 import random
 import uuid
-
+from shared.models import BaseModel
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
-
 from conf.settings import EMAIL_EXPIRATION_TIME, PHONE_EXPIRATION_TIME
+from rest_framework_simplejwt.tokens import RefreshToken
+import string
+from datetime import timedelta, datetime
 
 ORDINARY_USER, SELLER, ADMIN = ('ordinary_user', 'seller', 'admin')
 VIA_PHONE, VIA_EMAIL = ('via_phone', 'via_email')
 NEW, CODE_VERIFY, CHANGE_INFO, DONE = ('new', 'code_verify', 'change_info', 'done')
 
 
-class CustomUser(AbstractUser):
+class CustomUser(AbstractUser, BaseModel):
     USER_ROLE = (
         (ORDINARY_USER, ORDINARY_USER),
         (SELLER, SELLER),
@@ -39,6 +41,27 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.username
 
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}".strip()
+
+    def create_code(self, verify_type):
+        code = string.ascii_letters + string.digits
+        code = ''.join(random.choice(code) for _ in range(4))
+        CodeVerify.objects.create(
+            user=self,
+            code=code,
+            verify_type=verify_type,
+        )
+        return code
+
+    def token(self):
+        refresh = RefreshToken.for_user(self)
+        return {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+
     def check_username(self):
         if not self.username:
             temp_username = str(uuid.uuid4()).split('-')[-1]
@@ -47,12 +70,33 @@ class CustomUser(AbstractUser):
             self.username = temp_username
             self.save(update_fields=['username'])
 
-    @property
-    def get_full_name(self):
-        return f"{self.first_name} {self.last_name}".strip()
+    def check_password(self):
+        if not self.password():
+            temp_password = str(uuid.uuid4()).split('-')[-1]
+        self.password = temp_password
+        self.save(update_fields=['password'])
 
+    def email_normalize(self):
+        if self.email:
+            self.email = self.email.lower()
+            self.save(update_fields=['email'])
 
-class CodeVerify(models.Model):
+    def hash_pass(self, raw_password):
+        self.set_password(raw_password)
+        self.save(update_fields=['password'])
+
+    def clean(self):
+        super().clean()
+        self.email_normalize()
+        self.hash_pass()
+        self.check_username()
+        self.check_password()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+class CodeVerify(models.Model, BaseModel):
     VERIFY_TYPE = (
         (VIA_PHONE, VIA_PHONE),
         (VIA_EMAIL, VIA_EMAIL),
