@@ -3,38 +3,40 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import SignUpSerializer, LoginSerializer
+from .serializers import RequestCodeSerializer, VerifyCodeSerializer
 
 
-# Create your views here.
-
-class SignUpView(APIView):
+class RequestCodeView(APIView):
     def post(self, request):
-        serializer = SignUpSerializer(data=request.data)
+        serializer = RequestCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        record = serializer.save()
 
         return Response(
             {
-                'message': 'User created successfully.',
-                'user': SignUpSerializer(user).data,
+                'message': 'Verification code sent.',
+                'identifier': serializer.validated_data['identifier'],
+                'expires_at': record.expiration_time,
             },
             status=status.HTTP_201_CREATED,
         )
 
 
-class LoginView(APIView):
+class VerifyCodeView(APIView):
     def post(self, request):
-        serializer = LoginSerializer(data=request.data)
+        serializer = VerifyCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
+        result = serializer.save()
+        user = result['user']
         token = RefreshToken.for_user(user)
 
-        return Response(
-            {
-                'message': 'Login successful.',
+        response = {
+            'message': 'Verification successful.',
             'access': str(token.access_token),
             'refresh': str(token),
-            },
-            status=status.HTTP_200_OK,
-        )
+            'username': user.username,
+        }
+        if result['password']:
+            response['password'] = result['password']
+
+        return Response(response, status=status.HTTP_200_OK)

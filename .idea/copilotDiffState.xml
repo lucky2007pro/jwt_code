@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="/models (snapshot).py">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="/models (snapshot).py" />
+              <option name="originalContent" value="from django.db import models&#10;&#10;# Create your models here.&#10;" />
+              <option name="updatedContent" value="from django.contrib.auth.models import AbstractUser&#13;&#10;from django.db import models&#13;&#10;from django.utils import timezone&#13;&#10;&#13;&#10;&#13;&#10;class CustomUser(AbstractUser):&#13;&#10;    email = models.EmailField(unique=True, null=True, blank=True)&#13;&#10;    phone = models.CharField(max_length=20, unique=True, null=True, blank=True)&#13;&#10;&#13;&#10;    def __str__(self) -&gt; str:&#13;&#10;        return self.username&#13;&#10;&#13;&#10;&#13;&#10;class CodeVerify(models.Model):&#13;&#10;    PURPOSE_SIGNUP = 'signup'&#13;&#10;&#13;&#10;    PURPOSE_CHOICES = [&#13;&#10;        (PURPOSE_SIGNUP, 'Signup'),&#13;&#10;    ]&#13;&#10;&#13;&#10;    CHANNEL_EMAIL = 'email'&#13;&#10;    CHANNEL_PHONE = 'phone'&#13;&#10;&#13;&#10;    CHANNEL_CHOICES = [&#13;&#10;        (CHANNEL_EMAIL, 'Email'),&#13;&#10;        (CHANNEL_PHONE, 'Phone'),&#13;&#10;    ]&#13;&#10;&#13;&#10;    identifier = models.CharField(max_length=255)&#13;&#10;    channel = models.CharField(max_length=10, choices=CHANNEL_CHOICES)&#13;&#10;    purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES)&#13;&#10;    code = models.CharField(max_length=6)&#13;&#10;    is_used = models.BooleanField(default=False)&#13;&#10;    expires_at = models.DateTimeField()&#13;&#10;    created_at = models.DateTimeField(auto_now_add=True)&#13;&#10;&#13;&#10;    def is_expired(self) -&gt; bool:&#13;&#10;        return timezone.now() &gt;= self.expires_at&#13;&#10;&#13;&#10;    def __str__(self) -&gt; str:&#13;&#10;        return f&quot;{self.identifier} ({self.purpose})&quot;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
