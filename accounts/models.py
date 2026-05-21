@@ -1,3 +1,6 @@
+import random
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
@@ -35,6 +38,14 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    def check_username(self):
+        if not self.username:
+            temp_username = str(uuid.uuid4()).split('-')[-1]
+            while CustomUser.objects.filter(username=temp_username).exists():
+                temp_username += str(random.randint(0, 10))
+            self.username = temp_username
+            self.save(update_fields=['username'])
 
     @property
     def get_full_name(self):
