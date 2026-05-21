@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
-from django.conf.global_settings import MEDIA_URL
+from django.conf.global_settings import MEDIA_URL, EMAIL_BACKEND
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -143,3 +143,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 EMAIL_EXPIRATION_TIME = 5
 PHONE_EXPIRATION_TIME = 3
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'usa20070302@gmail.com'
+EMAIL_HOST_PASSWORD = 'hvpj hgle xnwm vptz'
