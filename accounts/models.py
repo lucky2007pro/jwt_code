@@ -10,7 +10,7 @@ import string
 
 ORDINARY_USER, SELLER, ADMIN = ('ordinary_user', 'seller', 'admin')
 VIA_PHONE, VIA_EMAIL = ('via_phone', 'via_email')
-NEW, CODE_VERIFY, CHANGE_INFO, DONE = ('new', 'code_verify', 'change_info', 'done')
+NEW, CODE_VERIFY, CHANGE_INFO, CHANGE_DONE = ('new', 'code_verify', 'change_info', 'change_done')
 
 
 class CustomUser(BaseModel, AbstractUser):
@@ -27,7 +27,7 @@ class CustomUser(BaseModel, AbstractUser):
         (NEW, NEW),
         (CODE_VERIFY, CODE_VERIFY),
         (CHANGE_INFO, CHANGE_INFO),
-        (DONE, DONE),
+        (CHANGE_DONE, CHANGE_DONE),
     )
 
     user_role = models.CharField(max_length=20, choices=USER_ROLE, default=ORDINARY_USER)
