@@ -39,6 +39,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'accounts',
+    'products',
+    'seller',
+    'cart',
+    'wishlist',
+    'reviews',
+    'orders',
+    'coupons',
 
     'rest_framework',
     'rest_framework_simplejwt',
@@ -54,6 +61,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'shared.pagination.StandardPagination',
+    'PAGE_SIZE': 20,
 }
 
 from datetime import timedelta
