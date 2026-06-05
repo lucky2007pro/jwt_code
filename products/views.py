@@ -118,7 +118,7 @@ class ProductListView(APIView):
     def get(self, request):
         products = Product.objects.filter(
             is_active=True
-        ).select_related('category', 'brand', 'seller').prefetch_related('images')
+            ).select_related('category', 'brand', 'seller').prefetch_related('images')
 
         category_slug = request.query_params.get('category')
         brand_slug = request.query_params.get('brand')
