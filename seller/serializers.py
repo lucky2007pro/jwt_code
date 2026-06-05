@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from .models import SellerProfile
+
+from accounts.models import SELLER
 from products.models import Product
-from products.serializers import ProductListSerializer
-from accounts.models import CustomUser, SELLER
+from .models import SellerProfile
 
 
 class SellerRegisterSerializer(serializers.ModelSerializer):
